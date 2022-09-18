@@ -38,6 +38,7 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
+        kinematic.increaseSpeed(acceleration, rotational_acceleration);
      }
      
      // place crumbs, do not change     
