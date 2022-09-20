@@ -38,6 +38,10 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
+        rotational_acceleration = kinematic.max_rotational_speed;
+        float targetRotation = atan2(kinematic.getPosition().y - target.y, kinematic.getPosition().x - target.x);
+        float directionRotation = mapToRange(targetRotation - kinematic.getHeading());
+        
         kinematic.increaseSpeed(acceleration, rotational_acceleration);
      }
      
