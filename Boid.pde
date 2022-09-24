@@ -25,6 +25,10 @@ class Boid
    KinematicMovement kinematic;
    PVector target;
    
+   // "private" variables
+   float current_accel;
+   float current_rotational_accel;
+   
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
      this.kinematic = new KinematicMovement(position, heading, max_speed, max_rotational_speed);
@@ -38,11 +42,29 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
-        rotational_acceleration = kinematic.max_rotational_speed;
-        float targetRotation = atan2(kinematic.getPosition().y - target.y, kinematic.getPosition().x - target.x);
-        float directionRotation = mapToRange(targetRotation - kinematic.getHeading());
+        // set base rotational speed
+        current_rotational_accel = rotational_acceleration;
+        // get absolute direction of target position
+        float targetRotation = atan2(target.y - kinematic.getPosition().y, target.x - kinematic.getPosition().x);
+        // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
+        float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
+        // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
+        if (directionRotation < 0)
+        {
+          current_rotational_accel *= -1;
+        }
         
-        kinematic.increaseSpeed(acceleration, rotational_acceleration);
+        print("target: " + targetRotation + "\n");
+        print("direction: " + directionRotation + "\n");
+        
+        // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
+        
+        // please ignore the magic numbers (that value is 20 degrees in radians); also this conditional doesn't work LMAO
+        if (abs(directionRotation) < 0.349066) {
+          current_rotational_accel *= -1;
+        }
+        
+        kinematic.increaseSpeed(acceleration, current_rotational_accel);
      }
      
      // place crumbs, do not change     
