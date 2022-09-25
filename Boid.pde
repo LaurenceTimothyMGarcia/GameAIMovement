@@ -26,8 +26,9 @@ class Boid
    PVector target;
    
    // "private" variables
-   float current_accel;
+   float current_accel = 1;
    float current_rotational_accel;
+   float slowdown_accel = -1;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -56,8 +57,13 @@ class Boid
         
         print("target: " + targetRotation + "\n");
         print("direction: " + directionRotation + "\n");
+        print("acceleration: " + acceleration + "\n");
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
+        if (target.y - kinematic.getPosition().y < 10 && target.x - kinematic.getPosition().x < 10)
+        {
+          acceleration = slowdown_accel;
+        }
         
         // please ignore the magic numbers (that value is 20 degrees in radians); also this conditional doesn't work LMAO
         if (abs(directionRotation) < 0.349066) {
