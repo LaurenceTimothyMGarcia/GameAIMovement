@@ -60,9 +60,14 @@ class Boid
         print("acceleration: " + acceleration + "\n");
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
-        if (target.y - kinematic.getPosition().y < 10 && target.x - kinematic.getPosition().x < 10)
+        if (target.y - kinematic.getPosition().y < 5 && target.x - kinematic.getPosition().x < 5)
         {
           acceleration = slowdown_accel;
+          
+          if (kinematic.getSpeed() < 0.05)
+          {
+            kinematic.increaseSpeed(-kinematic.getSpeed(), -current_rotational_accel);
+          }
         }
         else //Makes this go back and forth
         {
