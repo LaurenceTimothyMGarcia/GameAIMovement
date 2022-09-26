@@ -28,7 +28,7 @@ class Boid
    // "private" variables
    float current_accel = 1;
    float current_rotational_accel;
-   float slowdown_accel = -1;
+   float slowdown_accel = -2;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -63,6 +63,10 @@ class Boid
         if (target.y - kinematic.getPosition().y < 10 && target.x - kinematic.getPosition().x < 10)
         {
           acceleration = slowdown_accel;
+        }
+        else //Makes this go back and forth
+        {
+          acceleration = current_accel;
         }
         
         // please ignore the magic numbers (that value is 20 degrees in radians); also this conditional doesn't work LMAO

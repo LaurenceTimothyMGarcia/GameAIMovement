@@ -32,6 +32,7 @@ class KinematicMovement
      this.heading += this.rotational_velocity*dt;
      this.heading = normalize_angle(this.heading);
    }
+   
    private void setSpeed(float s, float rs)
    {
      this.speed = constrain(s, -max_speed, max_speed);
