@@ -28,7 +28,7 @@ class Boid
    // "private" variables
    float current_accel = 1;
    float current_rotational_accel;
-   float slowdown_accel = -2;
+   float slowdown_accel = -5;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -43,6 +43,9 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
+        float distance_y = target.y - kinematic.getPosition().y;
+        float distance_x = target.x - kinematic.getPosition().x;
+        
         // set base rotational speed
         current_rotational_accel = rotational_acceleration;
         // get absolute direction of target position
@@ -55,18 +58,22 @@ class Boid
           current_rotational_accel *= -1;
         }
         
+        print("TOTAL Y: " + abs(distance_y) + "\n");
+        print("TOTAL X: " + abs(distance_x) + "\n");
+        
         print("target: " + targetRotation + "\n");
         print("direction: " + directionRotation + "\n");
         print("acceleration: " + acceleration + "\n");
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
-        if (target.y - kinematic.getPosition().y < 5 && target.x - kinematic.getPosition().x < 5)
+        if (abs(distance_y) < 10 && abs(distance_x) < 10)
         {
           acceleration = slowdown_accel;
           
           if (kinematic.getSpeed() < 0.05)
           {
-            kinematic.increaseSpeed(-kinematic.getSpeed(), -current_rotational_accel);
+            acceleration = 0;
+            kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
           }
         }
         else //Makes this go back and forth
