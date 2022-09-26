@@ -29,6 +29,8 @@ class Boid
    float current_accel = 1;
    float current_rotational_accel;
    float slowdown_accel = -5;
+   int target_count = 0;
+   boolean visited = false;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -49,7 +51,7 @@ class Boid
         // set base rotational speed
         current_rotational_accel = rotational_acceleration;
         // get absolute direction of target position
-        float targetRotation = atan2(target.y - kinematic.getPosition().y, target.x - kinematic.getPosition().x);
+        float targetRotation = atan2(distance_y, distance_x);
         // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
         float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
@@ -74,6 +76,7 @@ class Boid
           {
             acceleration = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
+            //target_count++;
           }
         }
         else //Makes this go back and forth
@@ -140,7 +143,12 @@ class Boid
    void follow(ArrayList<PVector> waypoints)
    {
       // TODO: change to follow *all* waypoints
-      this.target = waypoints.get(0);
+      this.target = waypoints.get(target_count);
+      
+      if (target_count >= waypoints.size() - 1)
+      {
+        target_count = 0;
+      }
       
    }
 }
