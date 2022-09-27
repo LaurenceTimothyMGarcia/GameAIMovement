@@ -82,9 +82,10 @@ class Boid
             current_accel = 0;
             current_rotational_accel = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
-            target_count++;
-            if (target_count < waypt.size())
+            //target_count++;
+            if (waypt != null)
             {
+              waypt.remove(0);
               follow(waypt);
             }
           }
@@ -164,8 +165,14 @@ class Boid
       {
         return;
       }*/
+      //Unsure how to get the new waypoint after it finishes current one
       
       waypt = waypoints;
+      
+      if (waypt.size() <= 0)
+      {
+        return;
+      }
       
       this.target = waypt.get(target_count);
       print("ArrayList Waypoint: " + waypoints.get(target_count));
