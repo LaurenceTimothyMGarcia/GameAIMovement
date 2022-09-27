@@ -32,8 +32,6 @@ class Boid
    float current_rotational_accel;
    float slowdown_accel = -acceleration * 2;
    float slowdown_radius = abs(slowdown_accel * 10);
-   int target_count = 0;
-   boolean visited = false;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -84,14 +82,6 @@ class Boid
             current_accel = 0;
             current_rotational_accel = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
-            
-            //Unused Code
-            //target_count++;
-            /*if (waypt.size() > 0)
-            {
-              waypt.remove(0);
-              follow(waypt);
-            }*/
           }
         }
         else
@@ -178,8 +168,8 @@ class Boid
         return;
       }
       
-      this.target = waypt.get(target_count);
-      print("ArrayList Waypoint: " + waypoints.get(target_count) + "\n");
+      this.target = waypt.get(0);
+      print("ArrayList Waypoint: " + waypoints.get(0) + "\n");
       
       
    }
