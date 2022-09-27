@@ -53,16 +53,20 @@ class Boid
         
         //Setting base acceleration
         current_accel = acceleration;
+        
         // set base rotational speed
         current_rotational_accel = rotational_acceleration;
+        
         // get absolute direction of target position
         float targetRotation = atan2(distance_y, distance_x);
+        
         // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
         float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
+        
         // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
         if (directionRotation < 0)
         {
-          current_rotational_accel *= -1;
+          current_rotational_accel *= -1;  //increasing it will tighten the wiggle
         }
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
