@@ -83,7 +83,7 @@ class Boid
             current_rotational_accel = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
             //target_count++;
-            if (waypt != null)
+            if (waypt.size() > 0)
             {
               waypt.remove(0);
               follow(waypt);
