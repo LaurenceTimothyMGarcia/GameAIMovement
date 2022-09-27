@@ -26,9 +26,12 @@ class Boid
    PVector target;
    
    // "private" variables
-   float current_accel = 1;
+   ArrayList<PVector> waypt;
+   
+   float current_accel;
    float current_rotational_accel;
-   float slowdown_accel = -5;
+   float slowdown_accel = -acceleration * 2;
+   float slowdown_radius = abs(slowdown_accel * 10);
    int target_count = 0;
    boolean visited = false;
    
@@ -48,6 +51,8 @@ class Boid
         float distance_y = target.y - kinematic.getPosition().y;
         float distance_x = target.x - kinematic.getPosition().x;
         
+        //Setting base acceleration
+        current_accel = acceleration;
         // set base rotational speed
         current_rotational_accel = rotational_acceleration;
         // get absolute direction of target position
@@ -65,24 +70,28 @@ class Boid
         
         print("target: " + targetRotation + "\n");
         print("direction: " + directionRotation + "\n");
-        print("acceleration: " + acceleration + "\n");
+        print("acceleration: " + current_accel + "\n");
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
-        if (abs(distance_y) < 10 && abs(distance_x) < 10)
+        if (abs(distance_y) < 20 && abs(distance_x) < 20)
         {
-          acceleration = slowdown_accel;
+          current_accel = -acceleration * 2;
           
-          if (kinematic.getSpeed() < 0.05)
+          if (kinematic.getSpeed() == 0)
           {
-            acceleration = 0;
+            current_accel = 0;
             current_rotational_accel = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
-            visited = true;
+            target_count++;
+            if (target_count < waypt.size())
+            {
+              follow(waypt);
+            }
           }
         }
         else
         {
-          acceleration = current_accel;
+          current_accel = acceleration;
         }
         
         // please ignore the magic numbers (that value is 20 degrees in radians); also this conditional doesn't work LMAO
@@ -94,11 +103,11 @@ class Boid
         {
           target_count++;
           visited = false;
-          acceleration = current_accel;
+          current_accel = acceleration;
           current_rotational_accel = rotational_acceleration;
         }*/
         
-        kinematic.increaseSpeed(acceleration, current_rotational_accel);
+        kinematic.increaseSpeed(current_accel, current_rotational_accel);
      }
      
      // place crumbs, do not change     
@@ -146,19 +155,21 @@ class Boid
    void seek(PVector target)
    {
       this.target = target;
-      
    }
    
    void follow(ArrayList<PVector> waypoints)
    {
       // TODO: change to follow *all* waypoints
-      this.target = waypoints.get(target_count);
+      /*if (target_count < waypt.size())
+      {
+        return;
+      }*/
+      
+      waypt = waypoints;
+      
+      this.target = waypt.get(target_count);
       print("ArrayList Waypoint: " + waypoints.get(target_count));
       
-      if (target_count >= waypoints.size() - 1)
-      {
-        target_count = 0;
-      }
       
    }
 }
