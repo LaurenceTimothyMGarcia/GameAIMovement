@@ -93,16 +93,8 @@ class Boid
         }
         
         // please ignore the magic numbers (that value is 20 degrees in radians); also this conditional doesn't work LMAO
-        if (abs(directionRotation) < 0.349066) {
-          current_rotational_accel *= -1;
-        }
-        
-        /*if (visited)
-        {
-          target_count++;
-          visited = false;
-          current_accel = acceleration;
-          current_rotational_accel = rotational_acceleration;
+        /*if (abs(directionRotation) < 0.349066) {
+          current_rotational_accel *= -1;  //FOUND THE ISSUE HERE
         }*/
         
         kinematic.increaseSpeed(current_accel, current_rotational_accel);
