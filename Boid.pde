@@ -74,17 +74,24 @@ class Boid
         {
           current_accel = -acceleration * 2;
           
-          if (kinematic.getSpeed() == 0)
+          if (waypt.size() > 0)
+          {
+            waypt.remove(0);
+            follow(waypt);
+          }
+          else if (kinematic.getSpeed() == 0)
           {
             current_accel = 0;
             current_rotational_accel = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
+            
+            //Unused Code
             //target_count++;
-            if (waypt.size() > 0)
+            /*if (waypt.size() > 0)
             {
               waypt.remove(0);
               follow(waypt);
-            }
+            }*/
           }
         }
         else
