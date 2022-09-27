@@ -65,13 +65,6 @@ class Boid
           current_rotational_accel *= -1;
         }
         
-        print("TOTAL Y: " + abs(distance_y) + "\n");
-        print("TOTAL X: " + abs(distance_x) + "\n");
-        
-        print("target: " + targetRotation + "\n");
-        print("direction: " + directionRotation + "\n");
-        print("acceleration: " + current_accel + "\n");
-        
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
         if (abs(distance_y) < 20 && abs(distance_x) < 20)
         {
@@ -109,6 +102,14 @@ class Boid
         }*/
         
         kinematic.increaseSpeed(current_accel, current_rotational_accel);
+        
+        //DEBUGGING COMMENTS
+        //print("TOTAL Y: " + abs(distance_y) + "\n");
+        //print("TOTAL X: " + abs(distance_x) + "\n");
+        
+        //print("target: " + targetRotation + "\n");
+        //print("direction: " + directionRotation + "\n");
+        //print("acceleration: " + current_accel + "\n");
      }
      
      // place crumbs, do not change     
@@ -175,7 +176,7 @@ class Boid
       }
       
       this.target = waypt.get(target_count);
-      print("ArrayList Waypoint: " + waypoints.get(target_count));
+      print("ArrayList Waypoint: " + waypoints.get(target_count) + "\n");
       
       
    }
