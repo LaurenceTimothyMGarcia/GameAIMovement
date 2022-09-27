@@ -75,11 +75,12 @@ class Boid
           if (kinematic.getSpeed() < 0.05)
           {
             acceleration = 0;
+            current_rotational_accel = 0;
             kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
-            //target_count++;
+            visited = true;
           }
         }
-        else //Makes this go back and forth
+        else
         {
           acceleration = current_accel;
         }
@@ -88,6 +89,14 @@ class Boid
         if (abs(directionRotation) < 0.349066) {
           current_rotational_accel *= -1;
         }
+        
+        /*if (visited)
+        {
+          target_count++;
+          visited = false;
+          acceleration = current_accel;
+          current_rotational_accel = rotational_acceleration;
+        }*/
         
         kinematic.increaseSpeed(acceleration, current_rotational_accel);
      }
@@ -144,6 +153,7 @@ class Boid
    {
       // TODO: change to follow *all* waypoints
       this.target = waypoints.get(target_count);
+      print("ArrayList Waypoint: " + waypoints.get(target_count));
       
       if (target_count >= waypoints.size() - 1)
       {
