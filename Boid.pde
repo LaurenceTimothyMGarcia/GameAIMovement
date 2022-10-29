@@ -72,7 +72,7 @@ class Boid
         {
           current_accel = -acceleration * 2;
           
-          if (waypt != null)
+          if (waypt != null && waypt.size() > 0)
           {
             waypt.remove(0);
             follow(waypt);
