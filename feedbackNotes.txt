@@ -1,0 +1,28 @@
+First, I think you introduced a tiny bug when you added the waypoint-following: 
+    If the very first thing I do is left-click, it'll crash as soon as the boid reaches that point. 
+    I added "waypt != null" to the if-statement on line 75 and that fixed it. 
+
+Second, the wobbling: Your rotational_acceleration is always the maximum value when you're rotating. 
+    Here is a better approach: Instead of targeting an "angle", you could "target" a rotational velocity, 
+    which depends on the angle. 
+    
+    For example, if the angle to the target is 55 degrees, the "target rotational velocity" could be +15 degrees/s 
+        (or whichever value you set for maximum rotational velocity), but if the angle to the target is 
+        e.g. only 5 degrees, the "target rotational velocity" is only +5 degrees/s. Then you compare the 
+        current rotational velocity with this target, and accelerate/deccelerate accordingly: 
+        If the target is +5 degrees/s, but the current rotational velocity is +10 degrees/s, 
+        you will need to slow down the rotation, i.e. use a negative value for rotational acceleration 
+        in increaseSpeed(_, rotational_acceleration);. 
+        
+    The result is: As you get closer to the target angle, you will want to rotate slower, and automatically 
+        slow down the rotation accordingly. This should get rid of the wobbling. You should also use the same 
+        idea to slow down more gradually as you approach a point: There is a target forward speed, which depends 
+        on how close you are to the target point, and you use the acceleration to change the current speed towards 
+        that target speed. Third, when following a path, there should be a slowdown depending on how tight the corner is. 
+        Right now, if I create a corner that is an almost 180 degree turn, the Boid will make a very wide curve, which 
+        might result in issues during navigation, because you'll run into walls. If you use the aforementioned idea with a 
+        "target speed", you can have this target depend on the angle to the next target, i.e. if the next waypoint is in 
+        the opposite direction, the target speed should be lower than if it continues almost in the same direction. 
+        
+Final note: In "if (kinematic.getSpeed() == 0)", you "increaseSpeed" by -kinematic.getSpeed(), which will always be 0 
+    (it doesn't do anything, and you still set the rotational speed to 0, so something is happening, it just reads weird).
