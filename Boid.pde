@@ -77,11 +77,11 @@ class Boid
             waypt.remove(0);
             follow(waypt);
           }
-          else if (kinematic.getSpeed() == 0)
+          else if (kinematic.getSpeed() <= 0)
           {
             current_accel = 0;
-            current_rotational_accel = 0;
-            kinematic.increaseSpeed(-kinematic.getSpeed(), -kinematic.getRotationalVelocity());
+            current_rotational_accel = -kinematic.getRotationalVelocity();
+            //kinematic.increaseSpeed(current_accel, -kinematic.getRotationalVelocity());
           }
         }
         else
