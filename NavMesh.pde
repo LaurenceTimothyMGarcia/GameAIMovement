@@ -16,6 +16,8 @@ class Node
    Node(ArrayList<Wall> polygon) {
      this.polygon = polygon;
      get_center();
+     neighbors = new ArrayList<Node>();
+     connections = new ArrayList<Wall>();
    }
    
    // this only needs to be the visual center, right?
@@ -206,19 +208,19 @@ class NavMesh
          for(Node other: graph) {
            // we will not be linking a node to itself
            if(!node.equals(other)) {
+             // this kinda looks expensive...
+             // but hopefully in practice, because all of the polygons are triangles
+             // the following double for loop at max only runs 9 times
+             for(Wall n_wall: node.polygon) {
+               for (Wall o_wall: other.polygon) {
+                 if((n_wall.start == o_wall.start && n_wall.end == o_wall.end) || (n_wall.start == o_wall.end && n_wall.end == o_wall.start)) {
+                   node.add_neighbor(other);
+                 }
+               }
+             }
            }
          }
        }
-   }
-   
-   Boolean verify_no_duplicates(ArrayList<ArrayList<PVector>> list,ArrayList<PVector> entry) {
-     for(ArrayList<PVector> other_entry: list) {
-       for(int i = 0; i < 3; i++) {
-         if(entry.get(i).sub(other_entry.get(i)).mag() != 0) break;
-       }
-       return true;
-     }
-     return false;
    }
    
    ArrayList<PVector> findPath(PVector start, PVector destination)
@@ -240,14 +242,16 @@ class NavMesh
       //fill(0,255,0);
       /// use this to draw the nav mesh graph
       for(Node n: graph) {
-        stroke(0,255,0);
+        stroke(#B00B69);
         for(Wall w: n.polygon) {
           w.draw();
         }
-        //stroke(0,0,255);
-        //for(Wall w: n.connections) {
-        //  w.draw();
-        //}
+        stroke(#042069);
+        fill(#042069);
+        circle(n.center.x,n.center.y,5);
+        for(Wall w: n.connections) {
+          w.draw();
+        }
       }
    }
    
@@ -264,4 +268,32 @@ class NavMesh
       }
       return false;
    }
+}
+
+class PriorityQueue {
+  ArrayList<QueueNode> queue;
+  
+  public PriorityQueue() {
+    queue = new ArrayList<QueueNode>();
+  }
+  
+  void enqueue(Node node, float heuristic) {
+    queue.add(new QueueNode(node,heuristic));
+  }
+  
+  Node dequeue() {
+    return queue.remove(0).data;
+  }
+  
+  class QueueNode {
+    Node data;
+    float heuristic;
+    
+    public QueueNode(Node data, float heuristic) {
+      this.data = data;
+      this.heuristic = heuristic;
+    }
+    
+    // encapsulation is for losers
+  }
 }
