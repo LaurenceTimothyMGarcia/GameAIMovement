@@ -37,20 +37,23 @@ void mousePressed() {
   if (mouseButton == LEFT)
   {
      
-     if (waypoints.size() == 0)
-     {
-        // I have broken Billy's legs.
-        //billy.seek(target);
-     }
-     else
-     {
-        waypoints.add(target);
-        entering_path = false;
-        billy.follow(waypoints);
-     }
+     //if (waypoints.size() == 0)
+     //{
+     //   // I have broken Billy's legs.
+     //   //billy.seek(target);
+     //}
+     //else
+     //{
+     //   waypoints.add(target);
+     //   entering_path = false;
+     //   billy.follow(waypoints);
+     //}
      
      //temporary
      nm.funny_glow(billy.kinematic.getPosition(),target);
+     
+     waypoints.addAll(nm.findPath(billy.kinematic.getPosition(),target));
+     //billy.follow(waypoints); //<>//
   }
   else if (mouseButton == RIGHT)
   {

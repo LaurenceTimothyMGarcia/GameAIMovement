@@ -253,32 +253,40 @@ class NavMesh
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
       /// implement A* to find a path
-      // I actually wanna find a path between the polygons, actually...
+      // we want to run pathfinding on the graph, so find the polygons that the start and destination are in
       Node start_node = null,end_node = null;
       for(Node n: graph) {
         if(isPointInPolygon(start, n.polygon)) start_node = n;
         if(isPointInPolygon(destination,n.polygon)) end_node = n;
-        //println("start node is null: " + (start_node == null) + ", end node is null: " + (end_node == null));
       }
       assert(start_node != null && end_node != null);
       
-      PriorityQueue pqueue = new PriorityQueue();
-      TreeThing tree_thing = new TreeThing();
+      PriorityQueue<QueueNode> pqueue = new PriorityQueue<QueueNode>();
       
-      pqueue.enqueue(start_node,0,0);
-      tree_thing.add(start_node,null);
+      pqueue.offer(new QueueNode(start_node,0,0,null));
       
-      while(!pqueue.peek().equals(end_node)) {
-        float current_distance_traveled = pqueue.peek_distance_traveled();
-        Node best_node = pqueue.dequeue();
+      while(!pqueue.peek().data.equals(end_node)) { //<>//
+        float current_distance_traveled = pqueue.peek().distance_traveled;
+        QueueNode best_node = pqueue.poll();
+        //println("best node: " + best_node.data.center + ", distance traveled: " + best_node.distance_traveled + ", heuristic: " + best_node.heuristic);
         // expand best node
-        for(Node neighbor: best_node.neighbors) {
-          pqueue.enqueue(neighbor,current_distance_traveled + best_node.center.dist(neighbor.center),neighbor.center.dist(destination));
-          // the TreeThing class handles duplicates for us, dw
-          tree_thing.add(neighbor,best_node);
+        for(Node neighbor: best_node.data.neighbors) { //<>//
+          //println("  neighbor added to queue: " + neighbor.center);
+          QueueNode next_node = new QueueNode(neighbor,current_distance_traveled + best_node.data.center.dist(neighbor.center),neighbor.center.dist(destination),best_node);
+          
+          
+          if(!pqueue.contains(next_node)) pqueue.offer(next_node);
         }
       }
-      ArrayList<Node> reversed_list = tree_thing.get_array_list(end_node);
+      
+      ArrayList<Node> reversed_list = new ArrayList<Node>();
+      QueueNode current_node = pqueue.peek();
+      while(current_node != null) {
+        reversed_list.add(current_node.data);
+        current_node = current_node.parent;
+      }
+      
+      
       // this next loop should simultaneously correctly reverse the data properly and convert from Nodes to usable vectors
       ArrayList<PVector> result = new ArrayList<PVector>();
       while(reversed_list.size() > 1) {
@@ -291,7 +299,6 @@ class NavMesh
       // so now, you get a path through to each polygon and if you follow it you'll get to the polygon of end_node
       // now, all you'll need to do is...
       result.add(destination);
-      
       return result;
    }
    
@@ -342,92 +349,30 @@ class NavMesh
    }
 }
 
-class PriorityQueue {
-  ArrayList<QueueNode> queue;
-  
-  public PriorityQueue() {
-    queue = new ArrayList<QueueNode>();
-  }
-  
-  void enqueue(Node node, float distance_traveled, float heuristic) {
-    queue.add(new QueueNode(node,distance_traveled,heuristic));
-    Collections.sort(queue);
-  }
-  
-  Node dequeue() {
-    return queue.remove(0).data;
-  }
-  
-  Node peek() {
-    return queue.get(0).data;
-  }
-  
-  float peek_distance_traveled() {
-    return queue.get(0).distance_traveled;
-  }
-  
-  class QueueNode implements Comparable<QueueNode> {
+class QueueNode implements Comparable<QueueNode> {
     Node data;
     float distance_traveled;
     float heuristic;
+    QueueNode parent;
     
-    public QueueNode(Node data, float distance_traveled, float heuristic) {
+    public QueueNode(Node data, float distance_traveled, float heuristic, QueueNode parent) {
       this.data = data;
       this.distance_traveled = distance_traveled;
       this.heuristic = heuristic;
-    }
-    
-    int compareTo(QueueNode other) {
-        return Float.compare(distance_traveled + heuristic, other.distance_traveled + other.heuristic);
-    }
-    // encapsulation is for losers
-  }
-}
-
-// exists only to hold final path
-class TreeThing {
-  ArrayList<TreeThingNode> tree;
-  
-  TreeThing() {
-    tree = new ArrayList<TreeThingNode>();
-  }
-  
-  void add(Node new_data, Node parent) {
-    if (get_node(new_data) == null) {
-      tree.add(new TreeThingNode(new_data,get_node(parent)));
-    }
-  }
-  
-  TreeThingNode get_node(Node data) {
-    TreeThingNode out = null;
-    
-    for(TreeThingNode tnode: tree) {
-      if (tnode.data.equals(data)) out = tnode;
-    }
-    
-    return out;
-  }
-  
-  ArrayList<Node> get_array_list(Node new_data) {
-    ArrayList<Node> out_array = new ArrayList<Node>();
-    TreeThingNode current_node = get_node(new_data);
-    while (current_node != null) {
-      out_array.add(current_node.data);
-      current_node = current_node.parent;
-    }
-    
-    return out_array;
-  }
-  
-  class TreeThingNode {
-    Node data;
-    TreeThingNode parent;
-    
-    
-    
-    TreeThingNode(Node data,TreeThingNode parent) {
-      this.data = data;
       this.parent = parent;
     }
-  }
+    
+    @Override int compareTo(QueueNode other) {
+        return Float.compare(distance_traveled + heuristic, other.distance_traveled + other.heuristic);
+    }
+    
+    @Override boolean equals(Object other) {
+      if(other == this) return true;
+      if(!(other instanceof QueueNode)) return false;
+      
+      QueueNode o_node = (QueueNode) other;
+      
+      println("QueueNode.equals returned " + (data.center.x == o_node.data.center.x && data.center.y == o_node.data.center.y && distance_traveled == o_node.distance_traveled));
+      return( data.center.x == o_node.data.center.x && data.center.y == o_node.data.center.y && distance_traveled == o_node.distance_traveled);
+    }
 }
