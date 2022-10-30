@@ -275,7 +275,7 @@ class NavMesh
           QueueNode next_node = new QueueNode(neighbor,current_distance_traveled + best_node.data.center.dist(neighbor.center),neighbor.center.dist(destination),best_node);
           
           
-          if(!pqueue.contains(next_node)) pqueue.offer(next_node);
+          /*if(!pqueue.contains(next_node))*/ pqueue.offer(next_node);
         }
       }
       
@@ -372,7 +372,7 @@ class QueueNode implements Comparable<QueueNode> {
       
       QueueNode o_node = (QueueNode) other;
       
-      println("QueueNode.equals returned " + (data.center.x == o_node.data.center.x && data.center.y == o_node.data.center.y && distance_traveled == o_node.distance_traveled));
+      // if(data.center.x == o_node.data.center.x && data.center.y == o_node.data.center.y && distance_traveled == o_node.distance_traveled) println("QueueNode.equals returned true");
       return( data.center.x == o_node.data.center.x && data.center.y == o_node.data.center.y && distance_traveled == o_node.distance_traveled);
     }
 }

@@ -53,7 +53,7 @@ void mousePressed() {
      nm.funny_glow(billy.kinematic.getPosition(),target);
      
      waypoints.addAll(nm.findPath(billy.kinematic.getPosition(),target));
-     //billy.follow(waypoints); //<>//
+     billy.follow(waypoints); //<>//
   }
   else if (mouseButton == RIGHT)
   {
