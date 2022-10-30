@@ -170,6 +170,19 @@ class Map
       return false;
    }
    
+   // same function as "collides", but excludes any walls that have the endpoints of the target wall as an endpoint
+   // this can return false for a line connecting two of the map's vertices (I hope)
+   // but that includes lines that are "outside" the map as well, so bear that in mind
+   boolean collides_exclusive(PVector from, PVector to)
+   {
+      for (Wall w : walls)
+      {
+         if (w.start.dist(from) != 0 && w.start.dist(to) != 0 && w.end.dist(from) != 0 && w.end.dist(to) != 0)
+         if (w.crosses(from, to)) return true;
+      }
+      return false;
+   }
+   
    void doSplit(boolean xdir, float from, float to, float other, float otherend, ArrayList<PVector> points, int level)
    {
        float range = abs(to-from);
