@@ -1,6 +1,7 @@
 // Useful to sort lists by a custom key
 import java.util.Comparator;
-
+import java.util.Collections;
+import java.util.*;
 
 /// In this file you will implement your navmesh and pathfinding. 
 
@@ -38,6 +39,21 @@ class Node
        connections.add(new Wall(center, new_neighbor.center));
      }
    }
+   
+   Wall get_shared_edge(Node neighbor) {
+     assert(neighbors.contains(neighbor));
+     
+     for(Wall n_wall: polygon) {
+       for (Wall o_wall: neighbor.polygon) {
+         if((n_wall.start == o_wall.start && n_wall.end == o_wall.end) || (n_wall.start == o_wall.end && n_wall.end == o_wall.start)) {
+           return n_wall;
+         }
+       }
+     }
+     // the computer is too stupid to realize that it will never make it here
+     println("something absolutely horrible has gone wrong here");
+     return null;
+   }
 }
 
 
@@ -45,11 +61,16 @@ class Node
 class NavMesh
 {   
    ArrayList<Node> graph;
+   
+   ArrayList<Wall> funny_node;
   
    void bake(Map map)
    {
        /// generate the graph you need for pathfinding
        // using simple triangulation algorithm found at https://arxiv.org/ftp/arxiv/papers/1212/1212.6038.pdf:
+       
+       funny_node = new ArrayList<Wall>(); // temporary
+       
        
        // get array of vertices
        ArrayList<PVector> vertices = new ArrayList<PVector>();
@@ -223,10 +244,54 @@ class NavMesh
        }
    }
    
+   void funny_glow(PVector start, PVector end) {
+     funny_node.clear();
+     AddPolygon(funny_node,findPath(start,end).toArray(new PVector[0]));
+     funny_node.remove(funny_node.size() - 1);
+   }
+   
    ArrayList<PVector> findPath(PVector start, PVector destination)
    {
       /// implement A* to find a path
-      ArrayList<PVector> result = null;
+      // I actually wanna find a path between the polygons, actually...
+      Node start_node = null,end_node = null;
+      for(Node n: graph) {
+        if(isPointInPolygon(start, n.polygon)) start_node = n;
+        if(isPointInPolygon(destination,n.polygon)) end_node = n;
+        //println("start node is null: " + (start_node == null) + ", end node is null: " + (end_node == null));
+      }
+      assert(start_node != null && end_node != null);
+      
+      PriorityQueue pqueue = new PriorityQueue();
+      TreeThing tree_thing = new TreeThing();
+      
+      pqueue.enqueue(start_node,0,0);
+      tree_thing.add(start_node,null);
+      
+      while(!pqueue.peek().equals(end_node)) {
+        float current_distance_traveled = pqueue.peek_distance_traveled();
+        Node best_node = pqueue.dequeue();
+        // expand best node
+        for(Node neighbor: best_node.neighbors) {
+          pqueue.enqueue(neighbor,current_distance_traveled + best_node.center.dist(neighbor.center),neighbor.center.dist(destination));
+          // the TreeThing class handles duplicates for us, dw
+          tree_thing.add(neighbor,best_node);
+        }
+      }
+      ArrayList<Node> reversed_list = tree_thing.get_array_list(end_node);
+      // this next loop should simultaneously correctly reverse the data properly and convert from Nodes to usable vectors
+      ArrayList<PVector> result = new ArrayList<PVector>();
+      while(reversed_list.size() > 1) {
+        Node node_2 = reversed_list.get(1);
+        Node node_1 = reversed_list.remove(0);
+        
+        result.add(0,node_1.get_shared_edge(node_2).center());
+      }
+      // theoretically, result is now filled with the list of midpoints of edges of adjacent polygons
+      // so now, you get a path through to each polygon and if you follow it you'll get to the polygon of end_node
+      // now, all you'll need to do is...
+      result.add(destination);
+      
       return result;
    }
    
@@ -250,6 +315,13 @@ class NavMesh
         fill(#042069);
         circle(n.center.x,n.center.y,5);
         for(Wall w: n.connections) {
+          w.draw();
+        }
+        
+        
+        stroke(#420A55);
+        fill(#420A55);
+        for(Wall w: funny_node) {
           w.draw();
         }
       }
@@ -277,23 +349,85 @@ class PriorityQueue {
     queue = new ArrayList<QueueNode>();
   }
   
-  void enqueue(Node node, float heuristic) {
-    queue.add(new QueueNode(node,heuristic));
+  void enqueue(Node node, float distance_traveled, float heuristic) {
+    queue.add(new QueueNode(node,distance_traveled,heuristic));
+    Collections.sort(queue);
   }
   
   Node dequeue() {
     return queue.remove(0).data;
   }
   
-  class QueueNode {
+  Node peek() {
+    return queue.get(0).data;
+  }
+  
+  float peek_distance_traveled() {
+    return queue.get(0).distance_traveled;
+  }
+  
+  class QueueNode implements Comparable<QueueNode> {
     Node data;
+    float distance_traveled;
     float heuristic;
     
-    public QueueNode(Node data, float heuristic) {
+    public QueueNode(Node data, float distance_traveled, float heuristic) {
       this.data = data;
+      this.distance_traveled = distance_traveled;
       this.heuristic = heuristic;
     }
     
+    int compareTo(QueueNode other) {
+        return Float.compare(distance_traveled + heuristic, other.distance_traveled + other.heuristic);
+    }
     // encapsulation is for losers
+  }
+}
+
+// exists only to hold final path
+class TreeThing {
+  ArrayList<TreeThingNode> tree;
+  
+  TreeThing() {
+    tree = new ArrayList<TreeThingNode>();
+  }
+  
+  void add(Node new_data, Node parent) {
+    if (get_node(new_data) == null) {
+      tree.add(new TreeThingNode(new_data,get_node(parent)));
+    }
+  }
+  
+  TreeThingNode get_node(Node data) {
+    TreeThingNode out = null;
+    
+    for(TreeThingNode tnode: tree) {
+      if (tnode.data.equals(data)) out = tnode;
+    }
+    
+    return out;
+  }
+  
+  ArrayList<Node> get_array_list(Node new_data) {
+    ArrayList<Node> out_array = new ArrayList<Node>();
+    TreeThingNode current_node = get_node(new_data);
+    while (current_node != null) {
+      out_array.add(current_node.data);
+      current_node = current_node.parent;
+    }
+    
+    return out_array;
+  }
+  
+  class TreeThingNode {
+    Node data;
+    TreeThingNode parent;
+    
+    
+    
+    TreeThingNode(Node data,TreeThingNode parent) {
+      this.data = data;
+      this.parent = parent;
+    }
   }
 }

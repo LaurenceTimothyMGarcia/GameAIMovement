@@ -39,7 +39,8 @@ void mousePressed() {
      
      if (waypoints.size() == 0)
      {
-        billy.seek(target);
+        // I have broken Billy's legs.
+        //billy.seek(target);
      }
      else
      {
@@ -47,6 +48,9 @@ void mousePressed() {
         entering_path = false;
         billy.follow(waypoints);
      }
+     
+     //temporary
+     nm.funny_glow(billy.kinematic.getPosition(),target);
   }
   else if (mouseButton == RIGHT)
   {
