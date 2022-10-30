@@ -51,7 +51,6 @@ class NavMesh
        
        // get array of vertices
        ArrayList<PVector> vertices = new ArrayList<PVector>();
-       // ArrayList's foreach syntax makes me want to die; using a shitty for loop instead
        // for a simple polygon, # of sides == # of vertices, so just getting the start point of each side works out
        for(int index = 0 ; index < map.walls.size(); index++) {
          vertices.add(map.walls.get(index).start);
@@ -147,126 +146,69 @@ class NavMesh
          ears.remove(smallest_angle_index);
          ear_tip_angles.remove(smallest_angle_index);
          
-         // the two angles that were adjacent to the removed vertex are now adjacent
-         // determine if they are now ears, and if they are, determine their angles
-         // I am starting to cry and shit myself so I am going to copy and paste
-         int index_of_previous,index_of_next;
-         if(removed_vertex_index == 0) {
-           index_of_previous = vertices_copy.size() - 1;
-         }
-         else {
-           index_of_previous = removed_vertex_index - 1;
-         }
-         if(removed_vertex_index == vertices_copy.size()) {
-           index_of_next = 0;
-         }
-         else {
-           index_of_next = removed_vertex_index;
-         }
-         println("checking " + vertices_copy.get(index_of_previous) + " and " + vertices_copy.get(index_of_next));
-         
-         //// check if these were ears previously; if they were, remove them, as we are going to check if they are ears again
-         //int index_of_previous_ear = -1,index_of_next_ear = -1;
-         PVector previous_vertex = vertices.get(index_of_previous), following_vertex = vertices.get(index_of_next);
-         //for(int index = 0; index < ears.size(); index++) {
-         //  PVector current_ear_tip = ears.get(index).get(0);
-         //  if(current_ear_tip.sub(previous_vertex).mag() == 0) index_of_previous_ear = index;
-         //  else if(current_ear_tip.sub(following_vertex).mag() == 0) index_of_next_ear = index;
-         //}
-         
-         //if(index_of_previous_ear != -1) {
-         //  ears.remove(index_of_previous_ear);
-         //  ear_tip_angles.remove(index_of_previous_ear);
-         //}
-         //if(index_of_next_ear != -1) {
-         //  ears.remove(index_of_next_ear);
-         //  ear_tip_angles.remove(index_of_next_ear);
-         //}
-         int index_counter = 0;
-         for(ArrayList<PVector> ear: ears) {
-           PVector new_ear_tip = ear.get(0);
-           if(new_ear_tip.equals(previous_vertex) || new_ear_tip.equals(following_vertex)) {
-             //ears.remove(index_counter);
-             //ear_tip_angles.remove(index_counter);
-           }
-           index_counter++;
-         }
-         
-         PVector this_vertex,prev_vertex,next_vertex;
-         float length_a,length_b,length_c;
-         ArrayList<Wall> new_map = new ArrayList<Wall>();
-         AddPolygon(new_map, vertices_copy.toArray(ear_array));
-         
-         if(index_of_previous == 0) {
-           prev_vertex = vertices_copy.get(vertices_copy.size() - 1);
-         }
-         else {
-           prev_vertex = vertices_copy.get(index_of_previous - 1);
-         }
-         
-         if(index_of_previous == vertices_copy.size() - 1) {
-           next_vertex = vertices_copy.get(0);
-         }
-         else {
-           next_vertex = vertices_copy.get(index_of_previous + 1);
-         }
-         
-         this_vertex = vertices_copy.get(index_of_previous);
-         
-         if(!collides_exclusive(new_map,prev_vertex,next_vertex) && isPointInPolygon(PVector.mult(PVector.add(prev_vertex, next_vertex), 0.5),new_map)) {
+         // copy pasted loop
+         ears = new ArrayList<ArrayList<PVector>>();
+         ear_tip_angles = new ArrayList<Float>();
+         for(int index = 0; index < vertices_copy.size(); index++) {
+           // get this vertex, the previous vertex, and the next vertex
+           PVector this_vertex,prev_vertex,next_vertex;
            
-           ArrayList<PVector> new_ear = new ArrayList<PVector>();
-           new_ear.add(this_vertex);
-           new_ear.add(prev_vertex);
-           new_ear.add(next_vertex);
-           //if (verify_no_duplicates(ears,new_ear)) {
+           // the first vertex in the list's previous vertex is the last, and the last vertex's next node is the first
+           if(index == 0) {
+             prev_vertex = vertices_copy.get(vertices_copy.size() - 1);
+           }
+           else {
+             prev_vertex = vertices_copy.get(index - 1);
+           }
+           
+           if(index == vertices_copy.size() - 1) {
+             next_vertex = vertices_copy.get(0);
+           }
+           else {
+             next_vertex = vertices_copy.get(index + 1);
+           }
+           
+           this_vertex = vertices_copy.get(index);
+           
+           // determine if vertex is an ear tip (the line segment between prev_vertex and next_vertex must be entirely within the map)
+           // the collides_exclusive function on map (that I added) lets me exclude the sides that have the vertex as an endpoint
+           // in order to make sure the vertices can actually "see" each other I also check if the line's midpoint is inside the map
+           //print(!map.collides_exclusive(prev_vertex,next_vertex) && isPointInPolygon(PVector.mult(PVector.add(prev_vertex, next_vertex), 0.5),map.walls));
+           if(!collides_exclusive(map.walls,prev_vertex,next_vertex) && isPointInPolygon(PVector.mult(PVector.add(prev_vertex, next_vertex), 0.5),map.walls)) {
+             // this_vertex is an ear tip; now add a new ear to the list
+             ArrayList<PVector> new_ear = new ArrayList<PVector>();
+             new_ear.add(this_vertex);
+             new_ear.add(prev_vertex);
+             new_ear.add(next_vertex);
              ears.add(new_ear);
-             println("new ear added: " + new_ear);
-             // math time again baby
-             length_a = this_vertex.dist(next_vertex);
-             length_b = prev_vertex.dist(this_vertex);
-             length_c = prev_vertex.dist(next_vertex);
+             // then calculate the angle at the vertex
+             // given the location of three points, finding the angle can be done using law of cosines
+             // given triangle with sides a, b, and c, and angles A, B, and C such that A is opposite A, and so on:
+             // c^2 = a^2 + b^2 - 2ab*cos(C)
+             // or C = arccos( (c^2 - a^2 - b^2) / -2ab )
+             // let's say angle A is the angle at prev_vertex, angle B is the angle at next_vertex, and angle C is the angle at this_vertex (we want angle C)
+             // find side lengths:
+             float length_a = this_vertex.dist(next_vertex);
+             float length_b = prev_vertex.dist(this_vertex);
+             float length_c = prev_vertex.dist(next_vertex);
              float angle_at_vertex = acos( (sq(length_c) - sq(length_a) - sq(length_b)) / (-2 * length_a * length_b) );
              ear_tip_angles.add(angle_at_vertex);
-           //}
-         }
+             // hopefully each ear and the corresponding angle at the ear-tip will be at the same index... hopefully......
+           }
+       }
          
-         if(index_of_next == 0) {
-           prev_vertex = vertices_copy.get(vertices_copy.size() - 1);
-         }
-         else {
-           prev_vertex = vertices_copy.get(index_of_next - 1);
-         }
-         
-         if(index_of_next == vertices_copy.size() - 1) {
-           next_vertex = vertices_copy.get(0);
-         }
-         else {
-           next_vertex = vertices_copy.get(index_of_next + 1);
-         }
-         
-         this_vertex = vertices_copy.get(index_of_next);
-         
-         if(!collides_exclusive(new_map,prev_vertex,next_vertex) && isPointInPolygon(PVector.mult(PVector.add(prev_vertex, next_vertex), 0.5),new_map)) {
-           ArrayList<PVector> new_ear = new ArrayList<PVector>();
-           new_ear.add(this_vertex);
-           new_ear.add(prev_vertex);
-           new_ear.add(next_vertex);
-           //if (verify_no_duplicates(ears,new_ear)) {
-             ears.add(new_ear);
-           println("new ear added: " + new_ear);
-             // math time again baby
-             length_a = this_vertex.dist(next_vertex);
-             length_b = prev_vertex.dist(this_vertex);
-             length_c = prev_vertex.dist(next_vertex);
-             float angle_at_vertex = acos( (sq(length_c) - sq(length_a) - sq(length_b)) / (-2 * length_a * length_b) );
-             ear_tip_angles.add(angle_at_vertex);
-           //}
-         }
          println();
        } // end while
        
-       
+       // now we have our graph filled with nodes containing polygons, but they haven't been linked to each other yet
+       // to fix that is this following for loop:
+       for(Node node: graph) {
+         for(Node other: graph) {
+           // we will not be linking a node to itself
+           if(!node.equals(other)) {
+           }
+         }
+       }
    }
    
    Boolean verify_no_duplicates(ArrayList<ArrayList<PVector>> list,ArrayList<PVector> entry) {
