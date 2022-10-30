@@ -62,6 +62,7 @@ class Boid
         float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         
         // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
+        // Probably need to implement the fix here
         if (directionRotation < 0)
         {
           current_rotational_accel *= -1;  //increasing it will tighten the wiggle
@@ -69,6 +70,7 @@ class Boid
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
         if (abs(distance_y) < 20 && abs(distance_x) < 20)
+        //if (kinematic.getRotationalVelocity() > current_rotational_accel)
         {
           current_accel = -acceleration * 2;
           
@@ -89,20 +91,18 @@ class Boid
           current_accel = acceleration;
         }
         
-        // please ignore the magic numbers (that value is 20 degrees in radians); also this conditional doesn't work LMAO
-        /*if (abs(directionRotation) < 0.349066) {
-          current_rotational_accel *= -1;  //FOUND THE ISSUE HERE
-        }*/
-        
         kinematic.increaseSpeed(current_accel, current_rotational_accel);
         
         //DEBUGGING COMMENTS
         //print("TOTAL Y: " + abs(distance_y) + "\n");
         //print("TOTAL X: " + abs(distance_x) + "\n");
         
-        //print("target: " + targetRotation + "\n");
-        //print("direction: " + directionRotation + "\n");
-        //print("acceleration: " + current_accel + "\n");
+        print("target: " + targetRotation + "\n");
+        print("direction: " + directionRotation + "\n");
+        print("velocity: " + kinematic.getSpeed() + "\n");
+        print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
+        print("acceleration: " + current_accel + "\n");
+        print("rotational acceleration: " + current_rotational_accel + "\n");
      }
      
      // place crumbs, do not change     
