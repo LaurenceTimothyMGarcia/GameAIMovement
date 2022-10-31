@@ -65,15 +65,15 @@ class Boid
         
         target_rotational_velocity = lerp(0.0, max_rotational_velocity, abs(directionRotation) / max_angle);
         
-        if (abs(kinematic.getRotationalVelocity()) < abs(target_rotational_velocity))
+        if (kinematic.getRotationalVelocity() < target_rotational_velocity)
         {
           //increase acceleration
-          current_rotational_accel = -1 * abs(directionRotation) / max_angle;
+          current_rotational_accel = abs(directionRotation) / max_angle;
         }
-        else if (abs(kinematic.getRotationalVelocity()) > abs(target_rotational_velocity))
+        else if (kinematic.getRotationalVelocity() > target_rotational_velocity)
         {
           //decrease acceleration
-          current_rotational_accel = -1 * abs(directionRotation) / max_angle;
+          current_rotational_accel = abs(directionRotation) / max_angle;
         }
         
         if (directionRotation > max_angle)
