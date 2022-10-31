@@ -63,23 +63,23 @@ class Boid
         // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
         float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         
-        target_rotational_velocity = lerp(0.0, max_rotational_velocity, abs(directionRotation) / max_angle);
+        target_rotational_velocity = lerp(0.0, max_rotational_velocity, abs(directionRotation));
         
         if (kinematic.getRotationalVelocity() < target_rotational_velocity)
         {
           //increase acceleration
-          current_rotational_accel = directionRotation / max_angle;
+          current_rotational_accel = directionRotation;
           print("\nLess than\n");
         }
         else if (kinematic.getRotationalVelocity() > target_rotational_velocity)
         {
           //decrease acceleration
-          current_rotational_accel = directionRotation / max_angle;
+          current_rotational_accel = -directionRotation;
           print("\nGreater than\n");
         }
         else
         {
-          current_rotational_accel = 0;
+          //current_rotational_accel = 0;
           print("\nelse\n");
         }
         
@@ -132,7 +132,7 @@ class Boid
         print("target velocity: " + target_rotational_velocity + "\n");
         print("acceleration: " + current_accel + "\n");
         print("rotational acceleration: " + current_rotational_accel + "\n");
-        print("t: " + (abs(directionRotation) / max_angle) + "\n");
+        print("t: " + abs(directionRotation) + "\n");
      }
      
      // place crumbs, do not change     
