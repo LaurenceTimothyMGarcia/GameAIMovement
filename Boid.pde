@@ -30,8 +30,10 @@ class Boid
    
    float current_accel;
    float current_rotational_accel;
-   float slowdown_accel = -acceleration * 2;
-   float slowdown_radius = abs(slowdown_accel * 10);
+   
+   float target_rotational_velocity;
+   float max_rotational_velocity;
+   float max_angle = 55;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -61,11 +63,29 @@ class Boid
         // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
         float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         
+        target_rotational_velocity = lerp(0.0, max_rotational_velocity, abs(directionRotation) / max_angle);
+        
+        if (abs(kinematic.getRotationalVelocity()) < abs(target_rotational_velocity))
+        {
+          //increase acceleration
+          current_rotational_accel = -1 * abs(directionRotation) / max_angle;
+        }
+        else if (abs(kinematic.getRotationalVelocity()) > abs(target_rotational_velocity))
+        {
+          //decrease acceleration
+          current_rotational_accel = -1 * abs(directionRotation) / max_angle;
+        }
+        
+        if (directionRotation > max_angle)
+        {
+          current_rotational_accel = 1;
+        }
+        
         // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
         // Probably need to implement the fix here
         if (directionRotation < 0)
         {
-          current_rotational_accel *= -1;  //increasing it will tighten the wiggle
+          //current_rotational_accel *= -1;  //increasing it will tighten the wiggle
         }
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
@@ -103,6 +123,7 @@ class Boid
         print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
         print("acceleration: " + current_accel + "\n");
         print("rotational acceleration: " + current_rotational_accel + "\n");
+        print("t: " + (abs(directionRotation) / max_angle) + "\n");
      }
      
      // place crumbs, do not change     

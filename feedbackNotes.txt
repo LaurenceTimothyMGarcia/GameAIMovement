@@ -26,3 +26,18 @@ Second, the wobbling: Your rotational_acceleration is always the maximum value w
         
 Final note: In "if (kinematic.getSpeed() == 0)", you "increaseSpeed" by -kinematic.getSpeed(), which will always be 0 
     (it doesn't do anything, and you still set the rotational speed to 0, so something is happening, it just reads weird).
+
+
+// i havent tested it lmao but:
+// intended_rotational_velocity is what we want our rotational velocity to be
+// max_rotational_velocity is what our fastest possible rotational velocity should be when angle_to_target >= max_angle
+// and angle_to_target is self-explanatory
+
+float intended_rotational_velocity, max_rotational_velocity, angle_to_target, max_angle;
+// the value of t, abs(angle_to_target) / max_angle, is a value between 0 and 1, approaching 0 as the angle to target 
+    approaches 0 and 1 as it approaches max_angle
+
+// lerp will make it so that as the angle to target approaches 0 the intended velocity approaches 0
+
+// and as angle to target approaches max_angle the intended velocity will approach max_rotational_velocity
+intended_rotational_velocity = lerp(0,max_rotational_velocity,min(abs(angle_to_target) / max_angle));
