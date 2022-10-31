@@ -68,16 +68,24 @@ class Boid
         if (kinematic.getRotationalVelocity() < target_rotational_velocity)
         {
           //increase acceleration
-          current_rotational_accel = abs(directionRotation) / max_angle;
+          current_rotational_accel = directionRotation / max_angle;
+          print("\nLess than\n");
         }
         else if (kinematic.getRotationalVelocity() > target_rotational_velocity)
         {
           //decrease acceleration
-          current_rotational_accel = abs(directionRotation) / max_angle;
+          current_rotational_accel = directionRotation / max_angle;
+          print("\nGreater than\n");
+        }
+        else
+        {
+          current_rotational_accel = 0;
+          print("\nelse\n");
         }
         
         if (directionRotation > max_angle)
         {
+          print("Max Angle Override\n");
           current_rotational_accel = 1;
         }
         
@@ -121,6 +129,7 @@ class Boid
         print("direction: " + directionRotation + "\n");
         print("velocity: " + kinematic.getSpeed() + "\n");
         print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
+        print("target velocity: " + target_rotational_velocity + "\n");
         print("acceleration: " + current_accel + "\n");
         print("rotational acceleration: " + current_rotational_accel + "\n");
         print("t: " + (abs(directionRotation) / max_angle) + "\n");
