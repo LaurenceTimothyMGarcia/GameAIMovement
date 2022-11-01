@@ -262,6 +262,7 @@ class NavMesh
       assert(start_node != null && end_node != null);
       
       PriorityQueue<QueueNode> pqueue = new PriorityQueue<QueueNode>();
+      ArrayList<Node> visited = new ArrayList<Node>();
       
       pqueue.offer(new QueueNode(start_node,0,0,null));
       
@@ -271,11 +272,13 @@ class NavMesh
         //println("best node: " + best_node.data.center + ", distance traveled: " + best_node.distance_traveled + ", heuristic: " + best_node.heuristic);
         // expand best node
         for(Node neighbor: best_node.data.neighbors) { //<>//
-          //println("  neighbor added to queue: " + neighbor.center);
-          QueueNode next_node = new QueueNode(neighbor,current_distance_traveled + best_node.data.center.dist(neighbor.center),neighbor.center.dist(destination),best_node);
+          if(!visited.contains(neighbor)) {
+            //println("  neighbor added to queue: " + neighbor.center);
+            QueueNode next_node = new QueueNode(neighbor,current_distance_traveled + best_node.data.center.dist(neighbor.center),neighbor.center.dist(destination),best_node);
           
-          
-          /*if(!pqueue.contains(next_node))*/ pqueue.offer(next_node);
+            /*if(!pqueue.contains(next_node))*/ pqueue.offer(next_node);
+            visited.add(neighbor);
+          }
         }
       }
       
