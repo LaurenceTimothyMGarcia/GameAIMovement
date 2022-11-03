@@ -63,45 +63,43 @@ class Boid
         // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
         float angleToTarget = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         
-        //Lerp to determine between 0 and max rotatational velocity
+        // obtain a target rotational velocity
+        // if the magnitude of our angle to the target >= constant MAX_ANGLE, we intend for our boid to turn as fast as possible
+        // if the magnitude of our angle to target is 0 (I.E., boid is already facing the target), we don't want our boid to turn at all
+        // but what if our angle's magnitude is between 0 and the max angle?
+        // we use a linear interpolation to get a reasonable target velocity 
         target_rotational_velocity = lerp(0.0, kinematic.max_rotational_speed, min((abs(angleToTarget) / MAX_ANGLE),1.0));
-        // and flip the target rotation's sign if the angle is to the right
+        // we had to use abs value since I have no idea if lerp works with negative values
+        // therefore, re-switch the sign if necessary
         if(angleToTarget < 0) {
           target_rotational_velocity *= -1;
         }
         
-        
+        //now we want to accelerate such that our actual velocity will approach our target velocity
+        // obtain value of current rotational velocity
         float current_rotational_velocity = normalize_angle_left_right(kinematic.getRotationalVelocity());
-        
-        //Checks if current velocity is less than the target, then make acceleration positive to increase vel
+        //Checks if current velocity is less than the target velocity (means you need to accelerate to the left)
         if (current_rotational_velocity < target_rotational_velocity)
         {
-          //increase acceleration
-          current_rotational_accel = acceleration;
+          // leftwards acceleration is positive
+          current_rotational_accel = rotational_acceleration;
           print("\nLess than\n");
         }
-        //Checks if current vel is greater than target vel, then make acceleration negative to lower vel
+        //Checks if current velocity is greater than target velocity (means you need to accelerate to the right)
         else if (current_rotational_velocity > target_rotational_velocity)
         {
-          //decrease acceleration
-          current_rotational_accel = -acceleration;
+          // rightwards acceleration is negative
+          current_rotational_accel = -rotational_acceleration;
           print("\nGreater than\n");
         }
-        //This was to stop any increase or decrease in velocity in order to keep consistent
+        //if your target velocity is equal to your current velocity, you don't need to change your velocity further
         else
         {
           current_rotational_accel = 0;
           print("\nelse\n");
         }
-        
-        // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
-        // Probably need to implement the fix here
-        /*if (directionRotation < 0)
-        {
-          //current_rotational_accel *= -1;  //increasing it will tighten the wiggle
-        }*/
-        
-        // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
+        // now the boid's angular acceleration is towards the target angle 
+        // when the target angle is close, the boid should instead start decelerating
         if (abs(distance_y) < 20 && abs(distance_x) < 20)//keeping old condition cuz new point keeps it paused
         //if (kinematic.getRotationalVelocity() > current_rotational_accel)
         {
