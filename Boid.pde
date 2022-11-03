@@ -33,7 +33,7 @@ class Boid
    
    float target_rotational_velocity;
    float max_rotational_velocity;
-   float max_angle = 55;
+   float max_angle = normalize_angle(55);
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -63,26 +63,32 @@ class Boid
         // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
         float directionRotation = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         
+        //Lerp to determine between 0 and max rotatational velocity
         target_rotational_velocity = lerp(0.0, max_rotational_velocity, abs(directionRotation));
         
+        //Checks if current velocity is less than the target, then make acceleration positive to increase vel
         if (kinematic.getRotationalVelocity() < target_rotational_velocity)
         {
           //increase acceleration
           current_rotational_accel = directionRotation;
           print("\nLess than\n");
         }
+        //Checks if current vel is greater than target vel, then make acceleration negative to lower vel
         else if (kinematic.getRotationalVelocity() > target_rotational_velocity)
         {
           //decrease acceleration
           current_rotational_accel = -directionRotation;
           print("\nGreater than\n");
         }
+        //This was to stop any increase or decrease in velocity in order to keep consistent
         else
         {
-          //current_rotational_accel = 0;
+          //current_rotational_accel = 0;  //commented out due to just keeping it paused
           print("\nelse\n");
         }
         
+        //i dont think this if statement works
+        //was going to check if it goes beyond max angle, then it increases acceleration to get it back on track
         if (directionRotation > max_angle)
         {
           print("Max Angle Override\n");
@@ -91,13 +97,13 @@ class Boid
         
         // orient direction of acceleration properly (I.E. if moving leftwards set the acceleration to be towards left
         // Probably need to implement the fix here
-        if (directionRotation < 0)
+        /*if (directionRotation < 0)
         {
           //current_rotational_accel *= -1;  //increasing it will tighten the wiggle
-        }
+        }*/
         
         // now the boid's angular acceleration is towards the target angle; when the target angle is close, the boid should instead start decelerating
-        if (abs(distance_y) < 20 && abs(distance_x) < 20)
+        if (abs(distance_y) < 20 && abs(distance_x) < 20)//keeping old condition cuz new point keeps it paused
         //if (kinematic.getRotationalVelocity() > current_rotational_accel)
         {
           current_accel = -acceleration * 2;
