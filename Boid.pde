@@ -131,7 +131,7 @@ class Boid
             distToTarget = currDistToTarget;
             startPath = true;
           }
-          else if (kinematic.getSpeed() <= 0)  //Stops if no more waypoint and speed is stopped
+          else if (kinematic.getSpeed() <= 0)  //Doesnt reach this state at the last node
           {
             current_accel = 0;
             current_rotational_accel = -kinematic.getRotationalVelocity();
@@ -151,14 +151,13 @@ class Boid
         
         //print("target: " + targetRotation + "\n");
         //print("angle to target: " + angleToTarget + "\n");
-        print("velocity: " + kinematic.getSpeed() + "\n");
+        //print("velocity: " + kinematic.getSpeed() + "\n");
         //print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
         //print("target rotational velocity: " + target_rotational_velocity + "\n");
         //print("acceleration: " + current_accel + "\n");
         //print("rotational acceleration: " + current_rotational_accel + "\n");
         //print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
-        
-        print("ratio Distance: " + ratioDistance);
+        //print("ratio Distance: " + ratioDistance);
      }
      
      // place crumbs, do not change     
