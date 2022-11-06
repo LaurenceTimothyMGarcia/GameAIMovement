@@ -31,6 +31,12 @@ class Boid
    float current_accel;
    float current_rotational_accel;
    
+   //calcuate ratio to distance
+   float distToTarget;  //original distance
+   float currDistToTarget;  //current distance
+   float ratioDistance;  //current / original
+   boolean startPath = true;
+   
    float target_rotational_velocity;
    static final float MAX_ANGLE_DEGREES = 55;
    float MAX_ANGLE = radians(MAX_ANGLE_DEGREES);
@@ -50,6 +56,15 @@ class Boid
         // TODO: Implement seek here
         float distance_y = target.y - kinematic.getPosition().y;
         float distance_x = target.x - kinematic.getPosition().x;
+        
+        currDistToTarget = target.dist(kinematic.getPosition());
+        
+        //if new path, need to initialize the original distance to target
+        if (startPath)
+        {
+          distToTarget = currDistToTarget;
+          startPath = false;
+        }
         
         //Setting base acceleration
         current_accel = acceleration;
@@ -98,23 +113,27 @@ class Boid
           current_rotational_accel = 0;
           print("\nelse\n");
         }
+        
+        ratioDistance = currDistToTarget / distToTarget;
+        
         // now the boid's angular acceleration is towards the target angle 
         // when the target angle is close, the boid should instead start decelerating
-        if (abs(distance_y) < 20 && abs(distance_x) < 20)//keeping old condition cuz new point keeps it paused
-        //if (kinematic.getRotationalVelocity() > current_rotational_accel)
+        // make a ratio between current distance and overall distance, once halfway, start decelerating
+        if (ratioDistance < 0.25)//new condition checks if its 10% more
         {
-          current_accel = -acceleration * 2;
+          current_accel = -acceleration * (1 - ratioDistance);
           
-          if (waypt != null && waypt.size() > 0)
+          if (waypt != null && waypt.size() > 0 && currDistToTarget < 50)  //Goes to next waypt
           {
             waypt.remove(0);
             follow(waypt);
+            distToTarget = currDistToTarget;
           }
-          else if (kinematic.getSpeed() <= 0)
+          else if (kinematic.getSpeed() <= 0)  //Stops if no more waypoint and speed is stopped
           {
             current_accel = 0;
             current_rotational_accel = -kinematic.getRotationalVelocity();
-            //kinematic.increaseSpeed(current_accel, -kinematic.getRotationalVelocity());
+            startPath = true;
           }
         }
         else
@@ -128,14 +147,16 @@ class Boid
         //print("TOTAL Y: " + abs(distance_y) + "\n");
         //print("TOTAL X: " + abs(distance_x) + "\n");
         
-        print("target: " + targetRotation + "\n");
+        /*print("target: " + targetRotation + "\n");
         print("angle to target: " + angleToTarget + "\n");
         print("velocity: " + kinematic.getSpeed() + "\n");
         print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
         print("target velocity: " + target_rotational_velocity + "\n");
         print("acceleration: " + current_accel + "\n");
         print("rotational acceleration: " + current_rotational_accel + "\n");
-        print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
+        print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");*/
+        
+        print("ratio Distance: " + ratioDistance);
      }
      
      // place crumbs, do not change     
