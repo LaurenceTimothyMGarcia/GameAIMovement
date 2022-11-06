@@ -66,6 +66,8 @@ class Boid
           startPath = false;
         }
         
+        ratioDistance = currDistToTarget / distToTarget;
+        
         //Setting base acceleration
         current_accel = acceleration;
         
@@ -93,6 +95,7 @@ class Boid
         //now we want to accelerate such that our actual velocity will approach our target velocity
         // obtain value of current rotational velocity
         float current_rotational_velocity = normalize_angle_left_right(kinematic.getRotationalVelocity());
+        
         //Checks if current velocity is less than the target velocity (means you need to accelerate to the left)
         if (current_rotational_velocity < target_rotational_velocity)
         {
@@ -114,20 +117,19 @@ class Boid
           print("\nelse\n");
         }
         
-        ratioDistance = currDistToTarget / distToTarget;
-        
         // now the boid's angular acceleration is towards the target angle 
         // when the target angle is close, the boid should instead start decelerating
         // make a ratio between current distance and overall distance, once halfway, start decelerating
         if (ratioDistance < 0.25)//new condition checks if its 10% more
         {
-          current_accel = -acceleration * (1 - ratioDistance);
+          current_accel = -acceleration * (1 - ratioDistance);  //issue is that this can never get acceleration to 0
           
           if (waypt != null && waypt.size() > 0 && currDistToTarget < 50)  //Goes to next waypt
           {
             waypt.remove(0);
             follow(waypt);
             distToTarget = currDistToTarget;
+            startPath = true;
           }
           else if (kinematic.getSpeed() <= 0)  //Stops if no more waypoint and speed is stopped
           {
@@ -147,14 +149,14 @@ class Boid
         //print("TOTAL Y: " + abs(distance_y) + "\n");
         //print("TOTAL X: " + abs(distance_x) + "\n");
         
-        /*print("target: " + targetRotation + "\n");
-        print("angle to target: " + angleToTarget + "\n");
+        //print("target: " + targetRotation + "\n");
+        //print("angle to target: " + angleToTarget + "\n");
         print("velocity: " + kinematic.getSpeed() + "\n");
-        print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
-        print("target velocity: " + target_rotational_velocity + "\n");
-        print("acceleration: " + current_accel + "\n");
-        print("rotational acceleration: " + current_rotational_accel + "\n");
-        print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");*/
+        //print("rotational velocity: " + kinematic.getRotationalVelocity() + "\n");
+        //print("target rotational velocity: " + target_rotational_velocity + "\n");
+        //print("acceleration: " + current_accel + "\n");
+        //print("rotational acceleration: " + current_rotational_accel + "\n");
+        //print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
         
         print("ratio Distance: " + ratioDistance);
      }
