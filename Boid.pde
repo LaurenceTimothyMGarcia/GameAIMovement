@@ -101,14 +101,14 @@ class Boid
         {
           // leftwards acceleration is positive
           current_rotational_accel = rotational_acceleration;
-          print("\nLess than\n");
+          //print("\nLess than\n");
         }
         //Checks if current velocity is greater than target velocity (means you need to accelerate to the right)
         else if (current_rotational_velocity > target_rotational_velocity)
         {
           // rightwards acceleration is negative
           current_rotational_accel = -rotational_acceleration;
-          print("\nGreater than\n");
+          //print("\nGreater than\n");
         }
         //if your target velocity is equal to your current velocity, you don't need to change your velocity further
         else
@@ -122,7 +122,7 @@ class Boid
         // make a ratio between current distance and overall distance, once halfway, start decelerating
         if (ratioDistance < 0.25)//new condition checks if its 10% more
         {
-          current_accel = -acceleration * (1 - ratioDistance);  //issue is that this can never get acceleration to 0
+          current_accel = -acceleration * (1 - ratioDistance);  //either stops too early or doesnt stop in time 
           
           if (waypt != null && waypt.size() > 0 && currDistToTarget < 50)  //Goes to next waypt
           {
@@ -157,7 +157,7 @@ class Boid
         //print("acceleration: " + current_accel + "\n");
         //print("rotational acceleration: " + current_rotational_accel + "\n");
         //print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
-        //print("ratio Distance: " + ratioDistance);
+        print("\nratio Distance: " + ratioDistance);
      }
      
      // place crumbs, do not change     
