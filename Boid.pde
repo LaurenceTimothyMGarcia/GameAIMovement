@@ -120,7 +120,7 @@ class Boid
         // now the boid's angular acceleration is towards the target angle 
         // when the target angle is close, the boid should instead start decelerating
         // make a ratio between current distance and overall distance, once halfway, start decelerating
-        if (ratioDistance < 0.1)//new condition checks if its 10% more
+        if (ratioDistance < 0.25)//new condition checks if its 10% more
         {
           current_accel = -acceleration * (1 - ratioDistance);  //either stops too early or doesnt stop in time 
           
@@ -132,7 +132,7 @@ class Boid
             distToTarget = currDistToTarget;
             startPath = true;
           }
-          else if (kinematic.getSpeed() <= 0 && abs(distance_y) < 20 && abs(distance_x) < 20)  //Doesnt reach this state at the last node
+          else if (kinematic.getSpeed() <= 0 && abs(distance_y) < 25 && abs(distance_x) < 25)  //Doesnt reach this state at the last node
           {
             print("Reach last state\n");
             current_accel = 0;
