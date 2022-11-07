@@ -120,7 +120,7 @@ class Boid
         // now the boid's angular acceleration is towards the target angle 
         // when the target angle is close, the boid should instead start decelerating
         // make a ratio between current distance and overall distance, once halfway, start decelerating
-        if (ratioDistance < 0.25 || (ratioDistance < 0.5 && distToTarget < 100))//new condition checks if its 10% more
+        if (ratioDistance < 0.15 || (ratioDistance < 0.5 && distToTarget < 100))//new condition checks if its 10% more
         {
           current_accel = -acceleration * (1 - ratioDistance);  //either stops too early or doesnt stop in time 
           
