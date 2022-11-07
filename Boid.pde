@@ -114,28 +114,30 @@ class Boid
         else
         {
           current_rotational_accel = 0;
-          print("\nelse\n");
+          //print("\nelse\n");
         }
         
         // now the boid's angular acceleration is towards the target angle 
         // when the target angle is close, the boid should instead start decelerating
         // make a ratio between current distance and overall distance, once halfway, start decelerating
-        if (ratioDistance < 0.25)//new condition checks if its 10% more
+        if (ratioDistance < 0.1)//new condition checks if its 10% more
         {
           current_accel = -acceleration * (1 - ratioDistance);  //either stops too early or doesnt stop in time 
           
-          if (waypt != null && waypt.size() > 0 && currDistToTarget < 50)  //Goes to next waypt
+          if (waypt != null && waypt.size() > 1)  //Goes to next waypt
           {
+            current_accel = -acceleration * (1 - ratioDistance) / dt;
             waypt.remove(0);
             follow(waypt);
             distToTarget = currDistToTarget;
             startPath = true;
           }
-          else if (kinematic.getSpeed() <= 0)  //Doesnt reach this state at the last node
+          else if (kinematic.getSpeed() <= 0 && abs(distance_y) < 20 && abs(distance_x) < 20)  //Doesnt reach this state at the last node
           {
+            print("Reach last state\n");
             current_accel = 0;
             current_rotational_accel = -kinematic.getRotationalVelocity();
-            startPath = true;
+            //startPath = false;
           }
         }
         else
@@ -157,7 +159,10 @@ class Boid
         //print("acceleration: " + current_accel + "\n");
         //print("rotational acceleration: " + current_rotational_accel + "\n");
         //print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
-        print("\nratio Distance: " + ratioDistance);
+        print("overall Distance: " + distToTarget + "\n");
+        print("current Distance: " + currDistToTarget + "\n");
+        print("ratio Distance: " + ratioDistance + "\n");
+        //print("delta time: " + dt + "\n");
      }
      
      // place crumbs, do not change     
