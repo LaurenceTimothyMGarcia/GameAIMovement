@@ -135,7 +135,7 @@ class Boid
           else if (kinematic.getSpeed() <= 0 && abs(distance_y) < 25 && abs(distance_x) < 25)  //Doesnt reach this state at the last node
           {
             print("Reach last state\n");
-            current_accel = 0;
+            current_accel = -kinematic.getSpeed();
             current_rotational_accel = -kinematic.getRotationalVelocity();
             //startPath = false;
           }
