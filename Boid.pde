@@ -25,21 +25,18 @@ class Boid
    KinematicMovement kinematic;
    PVector target;
    
-   // "private" variables
    ArrayList<PVector> waypt;
    
-   float current_accel;
-   float current_rotational_accel;
+   float currentAccel;
+   float currentRotAccel;
    
-   //calcuate ratio to distance
-   float distToTarget;  //original distance
-   float currDistToTarget;  //current distance
-   float ratioDistance;  //current / original
-   boolean startPath = true;
+   float distToTarget = 0;
    
-   float target_rotational_velocity;
-   static final float MAX_ANGLE_DEGREES = 55;
-   float MAX_ANGLE = radians(MAX_ANGLE_DEGREES);
+   float distRatio;
+   float rotRatio;
+   
+   float maxSpeed;
+   float maxRotSpeed;
    
    Boid(PVector position, float heading, float max_speed, float max_rotational_speed, float acceleration, float rotational_acceleration)
    {
@@ -54,98 +51,73 @@ class Boid
      if (target != null)
      {  
         // TODO: Implement seek here
-        float distance_y = target.y - kinematic.getPosition().y;
-        float distance_x = target.x - kinematic.getPosition().x;
+        float distanceY = target.y - kinematic.getPosition().y;
+        float distanceX = target.x - kinematic.getPosition().x;
         
-        currDistToTarget = target.dist(kinematic.getPosition());
+        //angle between boid to target destination
+        float targetRotation = atan2(distanceY, distanceX);
         
-        //if new path, need to initialize the original distance to target
-        if (startPath)
-        {
-          distToTarget = currDistToTarget;
-          startPath = false;
-        }
-        
-        ratioDistance = currDistToTarget / distToTarget;
-        
-        //Setting base acceleration
-        current_accel = acceleration;
-        
-        // set base rotational speed
-        current_rotational_accel = rotational_acceleration;
-        
-        // get absolute direction of target position
-        float targetRotation = atan2(distance_y, distance_x);
-        
-        // get direction of target position relative to Boid's front; now (hopefully) leftwards movement is a positive angle and rightwards is negative
+        //get direction of target position relative to Boid's front
         float angleToTarget = normalize_angle_left_right(targetRotation - kinematic.getHeading());
         
-        // obtain a target rotational velocity
-        // if the magnitude of our angle to the target >= constant MAX_ANGLE, we intend for our boid to turn as fast as possible
-        // if the magnitude of our angle to target is 0 (I.E., boid is already facing the target), we don't want our boid to turn at all
-        // but what if our angle's magnitude is between 0 and the max angle?
-        // we use a linear interpolation to get a reasonable target velocity 
-        target_rotational_velocity = lerp(0.0, kinematic.max_rotational_speed, min((abs(angleToTarget) / MAX_ANGLE),1.0));
-        // we had to use abs value since I have no idea if lerp works with negative values
-        // therefore, re-switch the sign if necessary
-        if(angleToTarget < 0) {
-          target_rotational_velocity *= -1;
+        float currDistToTarget = target.dist(kinematic.getPosition());
+        
+        //sets up the overall distance between the 
+        if (distToTarget <= currDistToTarget)
+        {
+          distToTarget = currDistToTarget;
         }
         
-        //now we want to accelerate such that our actual velocity will approach our target velocity
-        // obtain value of current rotational velocity
-        float current_rotational_velocity = normalize_angle_left_right(kinematic.getRotationalVelocity());
+        distRatio = currDistToTarget / distToTarget;
+        rotRatio = angleToTarget / PI;
         
-        //Checks if current velocity is less than the target velocity (means you need to accelerate to the left)
-        if (current_rotational_velocity < target_rotational_velocity)
+        if (kinematic.getSpeed() > maxSpeed)
         {
-          // leftwards acceleration is positive
-          current_rotational_accel = rotational_acceleration;
-          //print("\nLess than\n");
-        }
-        //Checks if current velocity is greater than target velocity (means you need to accelerate to the right)
-        else if (current_rotational_velocity > target_rotational_velocity)
-        {
-          // rightwards acceleration is negative
-          current_rotational_accel = -rotational_acceleration;
-          //print("\nGreater than\n");
-        }
-        //if your target velocity is equal to your current velocity, you don't need to change your velocity further
-        else
-        {
-          current_rotational_accel = 0;
-          //print("\nelse\n");
+          maxSpeed = kinematic.getSpeed();
         }
         
-        // now the boid's angular acceleration is towards the target angle 
-        // when the target angle is close, the boid should instead start decelerating
-        // make a ratio between current distance and overall distance, once halfway, start decelerating
-        if (ratioDistance < 0.15 || (ratioDistance < 0.5 && distToTarget < 150) || (ratioDistance < 0.75 && distToTarget < 50))//new condition checks if its 10% more
+        currentAccel = acceleration * dt * distToTarget * 10;
+        
+        if (distRatio < 0.5)
         {
-          current_accel = -acceleration * (1 - ratioDistance);  //either stops too early or doesnt stop in time 
+          currentAccel *= -1;
           
-          if (waypt != null && waypt.size() > 1)  //Goes to next waypt
+          if (kinematic.getSpeed() <= maxSpeed / 2)
           {
-            current_accel = -acceleration * (1 - ratioDistance) / dt;
-            waypt.remove(0);
-            follow(waypt);
-            distToTarget = currDistToTarget;
-            startPath = true;
+            currentAccel = 0;
           }
-          else if (kinematic.getSpeed() <= 0) //&& abs(distance_y) < 25 && abs(distance_x) < 25)  //Doesnt reach this state at the last node
-          {
-            print("Reach last state\n");
-            current_accel = -kinematic.getSpeed();
-            current_rotational_accel = -kinematic.getRotationalVelocity();
-            //startPath = false;
-          }
-        }
-        else
-        {
-          current_accel = acceleration;
         }
         
-        kinematic.increaseSpeed(current_accel, current_rotational_accel);
+        if (angleToTarget > 0)
+        {
+          currentRotAccel = rotational_acceleration * dt * abs(rotRatio);
+        }
+        else if (angleToTarget < 0)
+        {
+          currentRotAccel = -rotational_acceleration * dt * abs(rotRatio);
+        }
+        else if (angleToTarget <= 0.05 && angleToTarget >= -0.05)
+        {
+          currentRotAccel = -kinematic.getRotationalVelocity();
+        }
+        
+        if (currDistToTarget <= 5)
+        {
+          currentAccel = 0;
+          currentRotAccel = 0;
+          maxSpeed = 0;
+          distToTarget = 0;
+        }
+        
+        if (waypt != null && waypt.size() > 1 && currDistToTarget < 10)
+        {
+          maxSpeed = 0;
+          maxRotSpeed = 0;
+          waypt.remove(0);
+          follow(waypt);
+        }
+        
+        kinematic.increaseSpeed(currentAccel, currentRotAccel);
         
         //DEBUGGING COMMENTS
         //print("TOTAL Y: " + abs(distance_y) + "\n");
@@ -159,9 +131,9 @@ class Boid
         //print("acceleration: " + current_accel + "\n");
         //print("rotational acceleration: " + current_rotational_accel + "\n");
         //print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
-        print("overall Distance: " + distToTarget + "\n");
-        print("current Distance: " + currDistToTarget + "\n");
-        print("ratio Distance: " + ratioDistance + "\n");
+        //print("overall Distance: " + distToTarget + "\n");
+        //print("current Distance: " + currDistToTarget + "\n");
+        //print("ratio Distance: " + ratioDistance + "\n");
         //print("delta time: " + dt + "\n");
      }
      
