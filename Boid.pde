@@ -99,30 +99,25 @@ class Boid
         //Checks if current velocity is less than the target velocity (means you need to accelerate to the left)
         if (current_rotational_velocity < target_rotational_velocity)
         {
-          // leftwards acceleration is positive
           current_rotational_accel = rotational_acceleration;
-          //print("\nLess than\n");
         }
         //Checks if current velocity is greater than target velocity (means you need to accelerate to the right)
         else if (current_rotational_velocity > target_rotational_velocity)
         {
-          // rightwards acceleration is negative
           current_rotational_accel = -rotational_acceleration;
-          //print("\nGreater than\n");
         }
         //if your target velocity is equal to your current velocity, you don't need to change your velocity further
         else
         {
           current_rotational_accel = 0;
-          //print("\nelse\n");
         }
         
         // now the boid's angular acceleration is towards the target angle 
         // when the target angle is close, the boid should instead start decelerating
         // make a ratio between current distance and overall distance, once halfway, start decelerating
-        if (ratioDistance < 0.15 || (ratioDistance < 0.5 && distToTarget < 150) || (ratioDistance < 0.75 && distToTarget < 50))//new condition checks if its 10% more
+        if (ratioDistance < 0.15 || (ratioDistance < 0.5 && distToTarget < 150) || (ratioDistance < 0.75 && distToTarget < 50))
         {
-          current_accel = -acceleration * (1 - ratioDistance);  //either stops too early or doesnt stop in time 
+          current_accel = -acceleration * (1 - ratioDistance);
           
           if (waypt != null && waypt.size() > 1)  //Goes to next waypt
           {
@@ -132,12 +127,11 @@ class Boid
             distToTarget = currDistToTarget;
             startPath = true;
           }
-          else if (kinematic.getSpeed() <= 0) //&& abs(distance_y) < 25 && abs(distance_x) < 25)  //Doesnt reach this state at the last node
+          else if (kinematic.getSpeed() <= 0)
           {
             print("Reach last state\n");
             current_accel = -kinematic.getSpeed();
             current_rotational_accel = -kinematic.getRotationalVelocity();
-            //startPath = false;
           }
         }
         else
@@ -159,9 +153,9 @@ class Boid
         //print("acceleration: " + current_accel + "\n");
         //print("rotational acceleration: " + current_rotational_accel + "\n");
         //print("t: " + abs(angleToTarget) / MAX_ANGLE + "\n");
-        print("overall Distance: " + distToTarget + "\n");
-        print("current Distance: " + currDistToTarget + "\n");
-        print("ratio Distance: " + ratioDistance + "\n");
+        //print("overall Distance: " + distToTarget + "\n");
+        //print("current Distance: " + currDistToTarget + "\n");
+        //print("ratio Distance: " + ratioDistance + "\n");
         //print("delta time: " + dt + "\n");
      }
      
